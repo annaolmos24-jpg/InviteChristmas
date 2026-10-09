@@ -115,12 +115,6 @@ footer{margin-top:56px;font-size:13px;letter-spacing:.2em;text-transform:upperca
           <label class="choice"><input type="radio" name="attending" value="No"><span>Sadly no</span></label>
         </div>
       </div>
-      <div class="row">
-        <div>
-          <label class="lbl" for="rsvp-guests">How many of you</label>
-          <input type="number" id="rsvp-guests" name="guests" min="1" max="10" value="1" inputmode="numeric">
-        </div>
-      </div>
       <div>
         <label class="lbl" for="rsvp-note">Note or dietary needs</label>
         <textarea id="rsvp-note" name="note" placeholder="Optional"></textarea>
@@ -174,7 +168,14 @@ footer{margin-top:56px;font-size:13px;letter-spacing:.2em;text-transform:upperca
       .then(function(r){ if(!r.ok) throw 0;
         var yes = form.attending.value === 'Yes';
         form.hidden = true;
-        document.querySelector('#rsvp .sub').textContent = yes ? 'Thank you! Your RSVP is in. See you on December 5th!' : 'Thanks for letting me know. You will be missed!';
+        var sub = document.querySelector('#rsvp .sub');
+        sub.textContent = yes ? 'Thank you! Your RSVP is in. See you on December 5th!' : 'Thanks for letting me know. You will be missed!';
+        if (yes){
+          var cal = document.querySelector('a.btn[href*="calendar.google.com"]').cloneNode(true);
+          cal.className = 'btn solid'; cal.textContent = 'Add to Google Calendar';
+          var wrap = document.createElement('div'); wrap.className = 'actions'; wrap.style.marginTop = '22px';
+          wrap.appendChild(cal); sub.after(wrap);
+        }
       })
       .catch(function(){ status.textContent = 'Something went wrong. Please try again.'; btn.disabled = false; });
   });
