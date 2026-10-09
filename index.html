@@ -101,10 +101,33 @@ footer{margin-top:56px;font-size:13px;letter-spacing:.2em;text-transform:upperca
   <section id="rsvp">
     <h2>Will you be there?</h2>
     <p class="sub">Let me know by November 28th so I can plan the food.</p>
-    <div class="actions" style="margin-top:22px">
-      <a class="btn solid" id="form-link" href="#rsvp" target="_blank" rel="noopener">RSVP here</a>
-    </div>
-    <p class="sub" id="form-note" style="margin-top:14px">It only takes a minute, no account needed.</p>
+    <form name="rsvp" id="rsvp-form" method="POST" action="/" data-netlify="true" netlify-honeypot="bot-field">
+      <input type="hidden" name="form-name" value="rsvp">
+      <p hidden><label>Leave this empty <input name="bot-field"></label></p>
+      <div>
+        <label class="lbl" for="rsvp-name">Your name</label>
+        <input type="text" id="rsvp-name" name="name" required autocomplete="name" placeholder="First and last name">
+      </div>
+      <div>
+        <span class="lbl" style="display:block;font-size:13px;font-weight:500;letter-spacing:.2em;text-transform:uppercase;margin-bottom:8px">Can you make it?</span>
+        <div class="choices">
+          <label class="choice"><input type="radio" name="attending" value="Yes" required><span>Joyfully yes</span></label>
+          <label class="choice"><input type="radio" name="attending" value="No"><span>Sadly no</span></label>
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label class="lbl" for="rsvp-guests">How many of you</label>
+          <input type="number" id="rsvp-guests" name="guests" min="1" max="10" value="1" inputmode="numeric">
+        </div>
+      </div>
+      <div>
+        <label class="lbl" for="rsvp-note">Note or dietary needs</label>
+        <textarea id="rsvp-note" name="note" placeholder="Optional"></textarea>
+      </div>
+      <div class="actions" style="margin-top:4px"><button class="btn solid" type="submit">Send RSVP</button></div>
+      <p class="status" id="rsvp-status" role="status" aria-live="polite"></p>
+    </form>
   </section>
 
   <footer>See you there · Merry Christmas</footer>
@@ -142,11 +165,19 @@ footer{margin-top:56px;font-size:13px;letter-spacing:.2em;text-transform:upperca
   }
   if (!reduce) draw();
 
-  // RSVP link: paste the Google Form link between the quotes
-  var FORM_URL = '';
-  var link = document.getElementById('form-link');
-  if (FORM_URL){ link.href = FORM_URL; }
-  else { link.removeAttribute('target'); link.textContent = 'RSVP link coming soon'; link.setAttribute('aria-disabled','true'); link.style.pointerEvents = 'none'; link.style.opacity = '.7'; }
+  // RSVP: saved by Netlify Forms (see Forms tab in the Netlify dashboard)
+  var form = document.getElementById('rsvp-form'), status = document.getElementById('rsvp-status');
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    var btn = form.querySelector('button'); btn.disabled = true; status.textContent = 'Sending...';
+    fetch('/', {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:new URLSearchParams(new FormData(form)).toString()})
+      .then(function(r){ if(!r.ok) throw 0;
+        var yes = form.attending.value === 'Yes';
+        form.hidden = true;
+        document.querySelector('#rsvp .sub').textContent = yes ? 'Thank you! Your RSVP is in. See you on December 5th!' : 'Thanks for letting me know. You will be missed!';
+      })
+      .catch(function(){ status.textContent = 'Something went wrong. Please try again.'; btn.disabled = false; });
+  });
 })();
 </script>
 
